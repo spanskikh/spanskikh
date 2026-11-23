@@ -33,7 +33,7 @@ Normative standard governing release lifecycle, traceability, document roles, qu
 ---
 
 ## 4. Tooling, Shell Safety & AI-Collaboration Protocol
-- **Workspace Instruction Anchor:** `~/projects/GEMINI.md` (with symlink `~/projects/AGENTS.md -> GEMINI.md`) serves as the workspace-wide context router pointing back to `spanskikh/DEVPROCESS.md` as Single Source of Truth (SSoT).
+- **Workspace Instruction Anchor:** `spanskikh/GEMINI.md` (symlinked at `~/projects/GEMINI.md` and `~/projects/AGENTS.md`) serves as the workspace-wide context router pointing back to `spanskikh/DEVPROCESS.md` as Single Source of Truth (SSoT).
 - **Primary Coding & Verification Agent (`CR-027`):** Antigravity CLI (`agy` v1.5.13, FastMCP-native) is the primary coding and verification agent across the cluster. User-level command allow/deny permissions are enforced in `~/.config/antigravity/settings.json`.
 - **Workspace Root Launch (`--add-dir ~/projects`):** Always launch `agy` from `~/projects` (or pass `--add-dir ~/projects`) so the agent loads `~/projects/GEMINI.md`, accesses SSoT governance files in `spanskikh/`, and edits target dev repositories without workspace-boundary prompts.
 - **Two-Phase Plan-Then-Edit Gate for Code CRs:** Before running `--mode accept-edits` on any code Change Request, run a fast read-only `--mode plan` pass to extract exact acceptance criteria from `docs/releases/v0.9.0-refine.md` and inspect target contracts (`models.py`, `server.py`, existing tests per `CAPA-002`).
