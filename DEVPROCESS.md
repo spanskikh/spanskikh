@@ -33,12 +33,24 @@ Normative standard governing release lifecycle, traceability, document roles, qu
 ---
 
 ## 4. Tooling, Shell Safety & AI-Collaboration Protocol
-- **Workspace Instruction Anchor:** `spanskikh/GEMINI.md` (symlinked at `~/projects/GEMINI.md` and `~/projects/AGENTS.md`) serves as the workspace-wide context router pointing back to `spanskikh/DEVPROCESS.md` as Single Source of Truth (SSoT).
+- **Workspace Instruction Anchor (`CAPA-008`):** `spanskikh/GEMINI.md` (symlinked at `~/projects/GEMINI.md` and `~/projects/AGENTS.md`) serves as the workspace-wide context router pointing back to `spanskikh/DEVPROCESS.md` as Single Source of Truth (SSoT).
 - **Primary Coding & Verification Agent (`CR-027`):** Antigravity CLI (`agy` v1.5.13, FastMCP-native) is the primary coding and verification agent across the cluster. User-level command allow/deny permissions are enforced in `~/.config/antigravity/settings.json`.
-- **Workspace Root Launch (`--add-dir ~/projects`):** Always launch `agy` from `~/projects` (or pass `--add-dir ~/projects`) so the agent loads `~/projects/GEMINI.md`, accesses SSoT governance files in `spanskikh/`, and edits target dev repositories without workspace-boundary prompts.
-- **Two-Phase Plan-Then-Edit Gate for Code CRs:** Before running `--mode accept-edits` on any code Change Request, run a fast read-only `--mode plan` pass to extract exact acceptance criteria from `docs/releases/v0.9.0-refine.md` and inspect target contracts (`models.py`, `server.py`, existing tests per `CAPA-002`).
+- **Workspace Root Launch (`--add-dir ~/projects`, `CAPA-008`):** Always launch `agy` from `~/projects` (or pass `--add-dir ~/projects`) so the agent loads `~/projects/GEMINI.md`, accesses SSoT governance files in `spanskikh/`, and edits target dev repositories without workspace-boundary truncation at child `.git` directories.
+- **Two-Phase Plan-Then-Edit Gate (`CAPA-008`) & Prompt/Log Archival (`CAPA-009`):** Every code Change Request (`CR-NNN`) must execute in two logged phases with both phase prompts and log paths (`logs/vX.Y.Z-crNNN-{plan,edit}.log`) archived in the release retrospective (`docs/releases/vX.Y.Z-retrospective.md`) and `docs/dev-log/`:
+  1. **Phase 1 — Read-Only Plan & Contract Audit (`--mode plan`):** Inspect `DEVPROCESS.md`, `docs/releases/vX.Y.Z-refine.md`, and target contracts (`models.py`, `contracts.py`, `server.py`, existing tests per `CAPA-002`) without mutating files:
+     ```bash
+     agy chat --mode plan --add-dir ~/projects \
+       "Read spanskikh/DEVPROCESS.md, docs/releases/vX.Y.Z-refine.md, and <repo>/{src,tests}. Produce a concise file-by-file plan and verification checklist for CR-NNN without editing files." \
+       > logs/vX.Y.Z-crNNN-plan.log 2>&1
+     ```
+  2. **Phase 2 — Accept-Edits Implementation & Logged Verification (`--mode accept-edits`):** Execute the approved plan, enforce string literals `<= 85` chars, record `docs/dev-log/` artifact, run verification gates via `./scripts/run_logged.sh`, and stop at the HITL Git boundary:
+     ```bash
+     agy chat --mode accept-edits --add-dir ~/projects \
+       "Execute approved CR-NNN plan in <repo> under spanskikh/DEVPROCESS.md: implement modules/tests (strings <= 85 chars), add docs/dev-log/ artifact, run ruff/mypy --strict/pytest via ./scripts/run_logged.sh, update CHANGELOG.md, and print git status + git diff --stat (HITL Gate: do NOT run git commit, git tag, or git push)." \
+       > logs/vX.Y.Z-crNNN-edit.log 2>&1
+     ```
 - **Deferred & Scoped Tools:** `Aider` is deferred. Local `Ollama` is restricted strictly to domain/business features and grammar-constrained LLM-as-a-Judge evaluation (`CAPA-006`: `<PydanticModel>.model_json_schema()`, `temperature=0.0`, `timeout >= 180.0s`).
-- **Human-in-the-Loop (HITL) Git Gate:** Agents edit files, run non-mutating git inspection (`git status`, `git diff`, `git log`, `git rev-parse`), and execute verification checks (`ruff`, `mypy --strict`, `pytest` routed to `logs/`). Only the human executes `git commit`, `git tag`, and `git push` after inspecting `git status` and `git diff` (also denied to agents in `~/.config/antigravity/settings.json`).
+- **Human-in-the-Loop (HITL) Git Gate (`CAPA-008`):** Agents edit files, run non-mutating git inspection (`git status`, `git diff`, `git log`, `git rev-parse`), and execute verification checks (`ruff`, `mypy --strict`, `pytest` routed to `logs/`). The explicit manual human perimeter covers `git diff` review, `git commit`, `git tag`, `git push`, and final release sign-off (mutating git and destructive shell commands are also denied to agents in `~/.config/antigravity/settings.json`).
 - **FastMCP `stdio` Conventions (`agy mcp`):** Register and inspect local `FastMCP` `stdio` servers via `agy mcp add|list|enable|disable|remove` (global config `~/.gemini/config/mcp_config.json`; flags precede `<name>`). `stdio` servers must never pollute `stdout` with non-JSON-RPC logs; route diagnostics to `stderr` or `logs/`.
 - **Local Toolchain & Workspace Scratchpad:** Always use `.venv/bin/ruff`, `.venv/bin/mypy --strict`, and `.venv/bin/pytest` inside each repository (never paid cloud APIs). Place temporary helper scripts in `~/projects/tmp/` rather than system `/tmp`.
 - **Interactive Shell Hygiene:** Never paste `set -e` into multi-line interactive `bash` commands (use `|| break` in loops). Keep `core.pager = "less -FRX"`, `GIT_PAGER=cat`, and `GH_PAGER=cat` (`gh config set pager cat`).

@@ -61,3 +61,20 @@ This register tracks real defects discovered during verification across the `hip
 
 ## CAPA-007: Sanitize PEP 610 Local `file://` References in Release SBOM Artifacts
 - **Preventive Rule:** Every CI SBOM pipeline and reproducibility test must strip local `file://` `externalReferences` before asserting host-path hygiene (`/home/`, `/Users/`) and publishing SBOM artifacts.
+
+## CAPA-008: Workspace Root Launch & Two-Phase Plan-Then-Edit Gate for Antigravity CLI (`agy`)
+- **Triggering Incidents (`v0.9.0` / `CR-027` & `CR-024`):**
+  1. Launching `agy` inside a child repository directory stops upward rule discovery at the child `.git` boundary, truncating visibility of the workspace instruction anchor (`~/projects/GEMINI.md`) and Single Source of Truth governance files in `~/projects/spanskikh/`.
+  2. Running direct code edits without an upfront read-only inspection pass risks unverified contract assumptions against `models.py`, `contracts.py`, `server.py`, or `docs/releases/vX.Y.Z-refine.md` acceptance criteria (`CAPA-002`).
+- **Root Cause:** Multi-repository agentic execution lacked an explicit workspace-root launch rule, tracked symlink topology, and mandatory read-only planning gate prior to file mutation.
+- **Corrective & Preventive Action (`CR-027`):**
+  1. **Workspace Root Launch (`--add-dir ~/projects`):** Always launch `agy` from `~/projects` (or pass `--add-dir ~/projects`) with `~/projects/GEMINI.md` and `~/projects/AGENTS.md` symlinked to Git-tracked `spanskikh/GEMINI.md`.
+  2. **Mandatory Two-Phase Plan-Then-Edit Gate:** Execute a fast read-only Phase 1 plan pass (`agy chat --mode plan --add-dir ~/projects`) to inspect target contracts and acceptance criteria before running Phase 2 edits and verification (`agy chat --mode accept-edits --add-dir ~/projects`).
+  3. **Strict HITL Git Gate:** Agents may edit files, run non-mutating git diagnostics (`git status`, `git diff`, `git log`, `git rev-parse`), and run verification gates routed to `logs/`; `git commit`, `git tag`, `git push`, and destructive filesystem commands remain strictly human-only (enforced in `DEVPROCESS.md` and `~/.config/antigravity/settings.json`).
+
+## CAPA-009: Agent Prompt Auditability & Phase-Log Traceability
+- **Triggering Incident (`v0.9.0`):** During multi-CR execution (`CR-027`, `CR-024`, `CR-025`, `CR-026`), phase logs were split across repository log directories (`sandbox-init/logs/v0.9.0-cr024-{plan,edit}.log` vs `spanskikh/logs/v0.9.0-cr025-plan.log` and `v0.9.0-cr026-plan.log`), and the exact Phase 1 / Phase 2 CLI prompts were not archived alongside `docs/dev-log/` and release records.
+- **Root Cause:** `DEVPROCESS.md` mandated logging linter/typecheck/pytest runs via `./scripts/run_logged.sh` (`CAPA-003`) but did not standardize archival of the exact Phase 1 Plan and Phase 2 Edit/Verify agent prompts and their corresponding `logs/vX.Y.Z-crNNN-{plan,edit}.log` paths.
+- **Corrective & Preventive Action (`v0.9.0` Closeout -> `v0.10.0` Gate):**
+  1. **Canonical Phase Log Naming (`logs/vX.Y.Z-crNNN-{plan,edit}.log`):** Route every Phase 1 (`--mode plan`) and Phase 2 (`--mode accept-edits`) `agy` invocation to `logs/vX.Y.Z-crNNN-plan.log` and `logs/vX.Y.Z-crNNN-edit.log` in addition to per-tool verification logs (`./scripts/run_logged.sh`).
+  2. **Mandatory Prompt & Log Traceability Table:** Document the exact Phase 1 Plan and Phase 2 Edit/Verify prompt summaries, CLI flags, commit SHAs, and phase/verification log artifact paths for every Change Request in `docs/releases/vX.Y.Z-retrospective.md` and `docs/dev-log/` so agent runs remain reproducible and forensically auditable.

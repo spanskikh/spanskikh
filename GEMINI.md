@@ -6,22 +6,26 @@ Workspace-wide instruction anchor for the `spanskikh` neuro-symbolic verificatio
 - **Canonical Process Standard:** Read and follow `~/projects/spanskikh/DEVPROCESS.md` as the authoritative SSoT before editing any repository.
 - **Canonical Governance Registry:**
   - Release roadmap & CR traceability: `~/projects/spanskikh/RELEASES.md`
-  - Defect log & preventive rules (`CAPA-001..007`): `~/projects/spanskikh/docs/DEFECTS_AND_CAPA.md`
+  - Defect log & preventive rules (`CAPA-001..009`): `~/projects/spanskikh/docs/DEFECTS_AND_CAPA.md`
+  - Business product & operator workflows: `~/projects/spanskikh/docs/PRODUCT_GUIDE.md`
   - Retrospectives & refinement backlogs: `~/projects/spanskikh/docs/releases/`
 - **Anti-Duplication (`CAPA-004` / `CAPA-005`):** Never duplicate `DEVPROCESS.md`, `RELEASES.md`, `docs/DEFECTS_AND_CAPA.md`, or `docs/releases/*` inside the 4 dev repos (`sandbox-init`, `abstract-ops`, `interview-ops`, `hostel-ops`).
-- **Rule Discovery Compatibility:** `~/projects/GEMINI.md` and `~/projects/AGENTS.md` symlink to `spanskikh/GEMINI.md`. Antigravity CLI (`agy`) auto-loads both `GEMINI.md` and `AGENTS.md` and deduplicates by resolved path; note that directory walk-up stops at a child repository's `.git` boundary, so launch workspace-wide sessions from `~/projects` or explicitly read `~/projects/spanskikh/DEVPROCESS.md`.
+- **Rule Discovery Compatibility (`CAPA-008`):** `~/projects/GEMINI.md` and `~/projects/AGENTS.md` symlink to `spanskikh/GEMINI.md`. Antigravity CLI (`agy`) auto-loads both `GEMINI.md` and `AGENTS.md` and deduplicates by resolved path; note that directory walk-up stops at a child repository's `.git` boundary, so launch workspace-wide sessions from `~/projects` (`--add-dir ~/projects`) or explicitly read `~/projects/spanskikh/DEVPROCESS.md`.
 
-## 2. Agent Roles & Model Policy
+## 2. Agent Roles, Two-Phase Protocol & Traceability
 - **Primary Coding & Verification Agent:** Antigravity CLI (`agy` v1.5.13, FastMCP-native). User-level allow/deny command permissions are enforced in `~/.config/antigravity/settings.json`.
-- **Workspace Root Launch (`--add-dir ~/projects`):** Launch `agy` from `~/projects` (or pass `--add-dir ~/projects`) to load `~/projects/GEMINI.md`, access `spanskikh/` SSoT files, and edit target dev repos without workspace-boundary prompts.
-- **Two-Phase Plan-Then-Edit Gate:** Before `--mode accept-edits` on any code CR, run a fast read-only `--mode plan` pass to extract acceptance criteria from `docs/releases/v0.9.0-refine.md` and inspect target contracts (`models.py`, `server.py`, existing tests per `CAPA-002`).
+- **Workspace Root Launch (`--add-dir ~/projects`, `CAPA-008`):** Launch `agy` from `~/projects` (or pass `--add-dir ~/projects`) to load `~/projects/GEMINI.md`, access `spanskikh/` SSoT files, and edit target dev repos without workspace-boundary truncation.
+- **Two-Phase Plan-Then-Edit Gate (`CAPA-008`):**
+  - **Phase 1 (`--mode plan`):** Fast read-only pass inspecting `DEVPROCESS.md`, `docs/releases/vX.Y.Z-refine.md`, and target contracts (`models.py`, `contracts.py`, `server.py`, tests per `CAPA-002`) routed to `logs/vX.Y.Z-crNNN-plan.log`.
+  - **Phase 2 (`--mode accept-edits`):** Execute approved edits, persist `docs/dev-log/` artifact, run `./scripts/run_logged.sh` verification gates (`ruff`, `mypy --strict`, `pytest`), update `CHANGELOG.md`, and route output to `logs/vX.Y.Z-crNNN-edit.log`.
+- **Prompt & Phase-Log Auditability (`CAPA-009`):** Archive exact Phase 1 and Phase 2 prompt summaries, CLI flags, commit SHAs, and `logs/vX.Y.Z-crNNN-{plan,edit}.log` paths for every CR in `docs/releases/vX.Y.Z-retrospective.md`.
 - **Aider:** Deferred; do not introduce Aider workflows or dependencies.
 - **Local `Ollama`:** Restricted strictly to domain/business features and grammar-constrained LLM-as-a-Judge tests (`CAPA-006`: pass `<PydanticModel>.model_json_schema()`, `temperature=0.0`, `timeout >= 180.0s`). Do not use paid cloud APIs in domain code or tests.
 
-## 3. Human-in-the-Loop (HITL) Git Gate
+## 3. Human-in-the-Loop (HITL) Git Gate (`CAPA-008`)
 - **Agent-Allowed Actions:** Edit files, run non-mutating git inspection (`git status`, `git diff`, `git log`, `git rev-parse`), and execute verification gates (`ruff`, `mypy --strict`, `pytest`).
 - **Human-Only Actions (STRICTLY FORBIDDEN FOR AGENTS):** Never run `git commit`, `git tag`, `git push`, or `rm -rf` (also blocked in `~/.config/antigravity/settings.json`).
-- **Handoff Requirement:** After completing edits and verification, present `git status` and a concise diff summary so the human reviews and executes Git mutations.
+- **Handoff Requirement:** After completing edits and verification, present `git status` and a concise diff summary (`git diff --stat`) so the human reviews `git diff`, executes `git commit` / `git tag` / `git push`, and signs off the release.
 
 ## 4. FastMCP `stdio` Conventions (`agy mcp`)
 - **Server Management:** Manage MCP registrations with `agy mcp list`, `agy mcp add`, `agy mcp enable`, `agy mcp disable`, and `agy mcp remove` (global config at `~/.gemini/config/mcp_config.json`).
