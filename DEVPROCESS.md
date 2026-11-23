@@ -34,7 +34,7 @@ Normative standard governing release lifecycle, traceability, document roles, qu
 
 ## 4. Tooling, Shell Safety & AI-Collaboration Protocol
 - **Local Toolchain & Workspace Scratchpad:** Always use `.venv/bin/ruff`, `.venv/bin/mypy --strict`, and `.venv/bin/pytest` (never `uv` or paid cloud APIs). Place temporary helper scripts in `~/projects/tmp/` rather than system `/tmp`.
-- **Interactive Shell Hygiene:** Never paste `set -e` into multi-line interactive `bash` commands (use `|| break` in loops). Keep `core.pager = "less -FRX"` and `GIT_PAGER=cat`.
+- **Interactive Shell Hygiene:** Never paste `set -e` into multi-line interactive `bash` commands (use `|| break` in loops). Keep `core.pager = "less -FRX"` and `GIT_PAGER=cat and GH_PAGER=cat (`gh config set pager cat`)`.
 - **Zero-Guesswork Contract Rule:** Never guess Pydantic field names or `@mcp.tool()` signatures; inspect `models.py` and `server.py` first before writing tests.
 - **Compact Exchange Protocol:** Deliver new modules/tests as clean code blocks with `Target: <relative_path>` headers rather than giant shell heredocs, and paste only compact 5–10 line summaries from `logs/*.log` into chat.
 
@@ -42,7 +42,7 @@ Normative standard governing release lifecycle, traceability, document roles, qu
 - **Log Routing & Summary Cap (`<= 15 lines`):** Route all linter, `mypy`, and `pytest` outputs into `logs/YYYYMMDD-HHMMSS_<task>.log` and never touch system `/tmp`; print at most 15 tail lines to stdout.
 
 ## Non-Interactive CLI Execution (No Pagers in Automation)
-- All automated shell loops, verification scripts, and `run_logged.sh` invocations **must** disable interactive terminal pagers (`less`/`more`) by setting `PAGER=cat`, `GIT_PAGER=cat`, and `GH_PAGER=""` (or passing explicit `--no-pager` / `--json ... --jq ...` flags) so non-TTY and scripted runs never block or truncate stdout.
+- All automated shell loops, verification scripts, and `run_logged.sh` invocations **must** disable interactive terminal pagers (`less`/`more`) by setting `PAGER=cat`, `GIT_PAGER=cat and GH_PAGER=cat (`gh config set pager cat`)`, and `GH_PAGER=""` (or passing explicit `--no-pager` / `--json ... --jq ...` flags) so non-TTY and scripted runs never block or truncate stdout.
 
 ## Release Session Isolation & Bootstrap Handoff
 
