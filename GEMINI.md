@@ -6,9 +6,9 @@ Workspace-wide instruction anchor for the `spanskikh` neuro-symbolic verificatio
 - **Canonical Process Standard:** Read and follow `~/projects/spanskikh/DEVPROCESS.md` as the authoritative SSoT before editing any repository.
 - **Canonical Governance Registry:**
   - Release roadmap & CR traceability: `~/projects/spanskikh/RELEASES.md`
-  - Defect log & preventive rules (`CAPA-001..009`): `~/projects/spanskikh/docs/DEFECTS_AND_CAPA.md`
+  - Defect log, preventive rules (`CAPA-001..012`) & feature backlog (`FEAT-XXX`): `~/projects/spanskikh/docs/DEFECTS_AND_CAPA.md`
   - Business product & operator workflows: `~/projects/spanskikh/docs/PRODUCT_GUIDE.md`
-  - Retrospectives & refinement backlogs: `~/projects/spanskikh/docs/releases/`
+  - Retrospectives & refinement backlogs (`FEAT-XXX -> CR-XXX`): `~/projects/spanskikh/docs/releases/`
 - **Anti-Duplication (`CAPA-004` / `CAPA-005`):** Never duplicate `DEVPROCESS.md`, `RELEASES.md`, `docs/DEFECTS_AND_CAPA.md`, or `docs/releases/*` inside the 4 dev repos (`sandbox-init`, `abstract-ops`, `interview-ops`, `hostel-ops`).
 - **Rule Discovery Compatibility (`CAPA-008`):** `~/projects/GEMINI.md` and `~/projects/AGENTS.md` symlink to `spanskikh/GEMINI.md`. Antigravity CLI (`agy`) auto-loads both `GEMINI.md` and `AGENTS.md` and deduplicates by resolved path; note that directory walk-up stops at a child repository's `.git` boundary, so launch workspace-wide sessions from `~/projects` (`--add-dir ~/projects`) or explicitly read `~/projects/spanskikh/DEVPROCESS.md`.
 
@@ -19,6 +19,7 @@ Workspace-wide instruction anchor for the `spanskikh` neuro-symbolic verificatio
   - **Phase 1 (`--mode plan`):** Fast read-only pass inspecting `DEVPROCESS.md`, `docs/releases/vX.Y.Z-refine.md`, and target contracts (`models.py`, `contracts.py`, `server.py`, tests per `CAPA-002`) routed to `logs/vX.Y.Z-crNNN-plan.log`.
   - **Phase 2 (`--mode accept-edits`):** Execute approved edits, persist `docs/dev-log/` artifact, run `./scripts/run_logged.sh` verification gates (`ruff`, `mypy --strict`, `pytest`), update `CHANGELOG.md`, and route output to `logs/vX.Y.Z-crNNN-edit.log`.
 - **Prompt & Phase-Log Auditability (`CAPA-009`):** Archive exact Phase 1 and Phase 2 prompt summaries, CLI flags, commit SHAs, and `logs/vX.Y.Z-crNNN-{plan,edit}.log` paths for every CR in `docs/releases/vX.Y.Z-retrospective.md`.
+- **Mandatory Defect/CAPA Sync, CI Python Fallback, Version Sync & Backlog Intake (`CAPA-010..012`):** Register every `BUG-XXX`, `CAPA-XXX`, and feature request (`FEAT-XXX`) in `~/projects/spanskikh/docs/DEFECTS_AND_CAPA.md` (pulling `FEAT-XXX` into `docs/releases/vX.Y.Z-refine.md` to form `CR-XXX` items per `CAPA-012`), use `PYTHON_BIN -> .venv/bin/python -> python3 -> python` fallback in shell wrappers (`CAPA-010`), and synchronize `[project].version = "X.Y.Z"` in `<repo>/pyproject.toml` whenever a repo changes in release/patch `vX.Y.Z` (`CAPA-011`).
 - **Aider:** Deferred; do not introduce Aider workflows or dependencies.
 - **Local `Ollama`:** Restricted strictly to domain/business features and grammar-constrained LLM-as-a-Judge tests (`CAPA-006`: pass `<PydanticModel>.model_json_schema()`, `temperature=0.0`, `timeout >= 180.0s`). Do not use paid cloud APIs in domain code or tests.
 

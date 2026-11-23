@@ -5,21 +5,22 @@ Normative standard governing release lifecycle, traceability, document roles, qu
 ---
 
 ## 1. Traceability & Zero-Orphan Artifact Rule
-- **Mandatory Change Request (`CR-XXX`):** No code, test, or process document may enter `main` without an assigned `CR-XXX` registered in `RELEASES.md` and `docs/releases/vX.Y.Z-refine.md`.
-- **Defect & CAPA Rule (`BUG-XXX` / `CAPA-XXX`):** Any discovered defect or recurring process failure halts new feature work until root cause, regression test, and cross-repo preventive rule are logged in `docs/DEFECTS_AND_CAPA.md`.
-- **Git Tagging & Branching:** Develop on `feat/cr-XXX-<slug>`, merge via `git merge --no-ff --no-edit`, and tag releases with `git -c tag.gpgSign=false tag -a vX.Y.Z -m "Release vX.Y.Z: CR-AAA..CR-BBB"`.
+- **Mandatory Change Request (`CR-XXX`) & Backlog-Driven Refinement (`FEAT-XXX`, `CAPA-012`):** No code, test, or process document may enter `main` without an assigned `CR-XXX` registered in `RELEASES.md` and `docs/releases/vX.Y.Z-refine.md`. New product and SDLC feature requests are first logged as `FEAT-XXX` entries in the unified cluster backlog inside `spanskikh/docs/DEFECTS_AND_CAPA.md` (alongside `BUG-XXX` and `CAPA-XXX`); each release refinement (`docs/releases/vX.Y.Z-refine.md`) pulls candidate `FEAT-XXX` items from that backlog and decomposes them into formal `CR-XXX` specifications.
+- **Defect & CAPA Registry Rule (`BUG-XXX` / `CAPA-XXX`, `CAPA-010`):** Any discovered defect or recurring process failure halts new feature work until root cause, regression test, and cross-repo preventive rule are logged in `spanskikh/docs/DEFECTS_AND_CAPA.md`. Every discovered `BUG-XXX` and `CAPA-XXX` must be registered in `spanskikh/docs/DEFECTS_AND_CAPA.md` before committing or closing out a release/patch (never in a repository `CHANGELOG.md` alone), and all shell wrappers must resolve `PYTHON_BIN -> .venv/bin/python -> python3 -> python` for hosted CI runner compatibility.
+- **Package Version Synchronization (`pyproject.toml`, `CAPA-011`) & Git Tagging:** Whenever a repository receives code, script, dependency, test, or packaging changes in a release or patch (`vX.Y.Z`), update `[project].version = "X.Y.Z"` in `<repo>/pyproject.toml` to match `vX.Y.Z` before tagging. Develop on `feat/cr-XXX-<slug>`, merge via `git merge --no-ff --no-edit`, and tag releases with `git -c tag.gpgSign=false tag -a vX.Y.Z -m "Release vX.Y.Z: CR-AAA..CR-BBB"`.
 
 ---
 
 ## 2. Release Lifecycle & Scrum Gates (`1 Release = 1 Chat Session`)
 1. **Opening Gate (`Retro` + `Refine` + `RELEASES.md`):**
    - Author `docs/releases/v{prev}-retrospective.md` with four required sections: `Lessons Learned`, `Rejected Ideas`, `Unlucky Probe-Runs`, and `Release Chat Digest`.
-   - Author `docs/releases/vX.Y.Z-refine.md` decomposing planned `CR-XXX` items, architectural learning value, and formal `Definition of Done (DoD)`.
+   - Select target `FEAT-XXX` backlog items (and any open `BUG-XXX` / `CAPA-XXX` actions) from `docs/DEFECTS_AND_CAPA.md` (`CAPA-012`) and author `docs/releases/vX.Y.Z-refine.md` decomposing planned `CR-XXX` items, `FEAT-XXX` links, architectural learning value, and formal `Definition of Done (DoD)`.
    - Register release **Business Goal** and CR contribution rows in `RELEASES.md`.
 2. **Execution Gate (`CR-XXX`):**
    - Persist incremental scripts/patches in `docs/dev-log/YYYYMMDD-HHMMSS_<cr-id>_<slug>.(sh|py|patch)` with an explicit `# Target: <relative_path>` header.
 3. **Verification & Closure Gate:**
    - Execute checks via `./scripts/run_logged.sh <task> -- <cmd>` (`.venv/bin/ruff check src tests`, `.venv/bin/mypy src tests --strict`, `.venv/bin/pytest -v -m "not integration"`).
+   - Verify that every discovered `BUG-XXX` / `CAPA-XXX` is registered in `spanskikh/docs/DEFECTS_AND_CAPA.md` (`CAPA-010`) and that `[project].version` in `<repo>/pyproject.toml` matches `X.Y.Z` for every modified repository (`CAPA-011`).
    - Record verified metrics and log artifact paths in `CHANGELOG.md`, tag `vX.Y.Z`, and push `main` + tags.
 
 ---
