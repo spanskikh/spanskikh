@@ -4,6 +4,20 @@ Official release roadmap and business-value traceability matrix across the local
 
 ---
 
+## Release `v0.9.0` (In Progress — 2026-11-23)
+- **Primary Business Goal — Agentic SDLC Adoption (Zero Copy-Paste):** Introduce `~/projects/GEMINI.md` (context router acting as `SKILL.md`), Antigravity CLI (`agy` v1.5.13, FastMCP-native) as primary coding/verification agent, and a Human-in-the-Loop Git gate in `DEVPROCESS.md`.
+- **Secondary Business Goal — Unified Multi-Agent Product Orchestration:** Connect all 4 repos into a single-command `FastMCP` Supervisor/Worker pipeline (`CR-024..CR-026`).
+- **Refinement Record:** [`docs/releases/v0.9.0-refine.md`](docs/releases/v0.9.0-refine.md)
+
+| CR # & Short Name | Repository | Short Task Description | Contribution to Release Business Goal | Architecture Learning Value | Formal Invariant / DoD |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **CR-027: Workspace Agent Anchor, `agy` Primary Agent & HITL Gate** | `spanskikh` + `~/projects/` | Create `~/projects/GEMINI.md` (+ `AGENTS.md` symlink), update `DEVPROCESS.md` with `agy` v1.5.13, HITL Git gate, Track A/B roadmaps, and log non-mutating readiness checks. | Eliminates manual copy-paste bootstrap drift and enforces human-supervised agentic execution across all 5 repos. | Hierarchical rule-anchor architecture (`GEMINI.md` / `AGENTS.md` -> SSoT `DEVPROCESS.md`) and least-privilege HITL permission boundaries. | `~/projects/GEMINI.md` + `DEVPROCESS.md` updated; `logs/v0.9.0-cr027-readiness.log` recorded; `test_profile_quality.py` green; HITL Git gate respected. |
+| **CR-024: Topology-Aware Integration Runner** | `sandbox-init` | Host/Docker topology-aware integration runner handling `127.0.0.1` vs container DSN/URL and `AUDIT_DB_PATH` overrides automatically. | Removes manual environment override friction when running live `hippo <-> rhino` verification suites. | Environment-agnostic integration harness design bridging container and host network topologies. | Offline + live integration runs green without manual `.env` edits; `ruff`, `mypy --strict`, `pytest` green. |
+| **CR-025: Cross-Repo `FastMCP` `stdio` Supervisor/Worker Orchestrator** | All 4 dev repos | End-to-end single-command `FastMCP` `stdio` Supervisor/Worker chain (`sandbox-init` -> `abstract-ops` -> `interview-ops` -> `hostel-ops`). | Delivers unified multi-agent product orchestration over verified neuro-symbolic MCP tool boundaries. | Multi-agent `FastMCP` `stdio` composition with deterministic Z3 gating at every inter-agent hop. | Single-command Supervisor/Worker chain executes end-to-end with verified `SAT`/`UNSAT` contract assertions. |
+| **CR-026: Shared `CycloneDX` PEP 610 `file://` Sanitizer CLI** | `sandbox-init` (+ dev repos) | Extract shared `CycloneDX` PEP 610 `file://` `externalReferences` sanitizer CLI (`CAPA-007`) reused across CI pipelines and tests. | Centralizes supply-chain SBOM path hygiene and eliminates duplicated sanitizer logic across 4 repos. | Reusable supply-chain provenance sanitization tooling enforcing deterministic, runner-agnostic SBOMs. | Shared sanitizer CLI passes unit + reproducibility tests with zero `/home/<user>/` or `file://` leakage. |
+
+---
+
 ## Release `v0.8.0` (Released — 2026-11-23)
 - **Business Goal:** Enforce cross-cluster Z3 RAM allocation invariants (`hippo` 24 GiB / `rhino` 16 GiB), 12-tool FastMCP namespace disjointness, deterministic `CycloneDX` SBOM reproducibility, and live end-to-end `Ollama` + `rhino` PostgreSQL sign-off (`139/139` tests green).
 - **Retrospective:** [`docs/releases/v0.8.0-retrospective.md`](docs/releases/v0.8.0-retrospective.md) | **Refinement Record:** [`docs/releases/v0.9.0-refine.md`](docs/releases/v0.9.0-refine.md)

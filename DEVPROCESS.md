@@ -33,16 +33,36 @@ Normative standard governing release lifecycle, traceability, document roles, qu
 ---
 
 ## 4. Tooling, Shell Safety & AI-Collaboration Protocol
-- **Local Toolchain & Workspace Scratchpad:** Always use `.venv/bin/ruff`, `.venv/bin/mypy --strict`, and `.venv/bin/pytest` (never `uv` or paid cloud APIs). Place temporary helper scripts in `~/projects/tmp/` rather than system `/tmp`.
-- **Interactive Shell Hygiene:** Never paste `set -e` into multi-line interactive `bash` commands (use `|| break` in loops). Keep `core.pager = "less -FRX"` and `GIT_PAGER=cat and GH_PAGER=cat (`gh config set pager cat`)`.
+- **Workspace Instruction Anchor:** `~/projects/GEMINI.md` (with symlink `~/projects/AGENTS.md -> GEMINI.md`) serves as the workspace-wide context router pointing back to `spanskikh/DEVPROCESS.md` as Single Source of Truth (SSoT).
+- **Primary Coding & Verification Agent (`CR-027`):** Antigravity CLI (`agy` v1.5.13, FastMCP-native) is the primary coding and verification agent across the cluster. User-level command allow/deny permissions are enforced in `~/.config/antigravity/settings.json`.
+- **Deferred & Scoped Tools:** `Aider` is deferred. Local `Ollama` is restricted strictly to domain/business features and grammar-constrained LLM-as-a-Judge evaluation (`CAPA-006`: `<PydanticModel>.model_json_schema()`, `temperature=0.0`, `timeout >= 180.0s`).
+- **Human-in-the-Loop (HITL) Git Gate:** Agents edit files, run non-mutating git inspection (`git status`, `git diff`, `git log`, `git rev-parse`), and execute verification checks (`ruff`, `mypy --strict`, `pytest` routed to `logs/`). Only the human executes `git commit`, `git tag`, and `git push` after inspecting `git status` and `git diff` (also denied to agents in `~/.config/antigravity/settings.json`).
+- **FastMCP `stdio` Conventions (`agy mcp`):** Register and inspect local `FastMCP` `stdio` servers via `agy mcp add|list|enable|disable|remove` (global config `~/.gemini/config/mcp_config.json`; flags precede `<name>`). `stdio` servers must never pollute `stdout` with non-JSON-RPC logs; route diagnostics to `stderr` or `logs/`.
+- **Local Toolchain & Workspace Scratchpad:** Always use `.venv/bin/ruff`, `.venv/bin/mypy --strict`, and `.venv/bin/pytest` inside each repository (never paid cloud APIs). Place temporary helper scripts in `~/projects/tmp/` rather than system `/tmp`.
+- **Interactive Shell Hygiene:** Never paste `set -e` into multi-line interactive `bash` commands (use `|| break` in loops). Keep `core.pager = "less -FRX"`, `GIT_PAGER=cat`, and `GH_PAGER=cat` (`gh config set pager cat`).
 - **Zero-Guesswork Contract Rule:** Never guess Pydantic field names or `@mcp.tool()` signatures; inspect `models.py` and `server.py` first before writing tests.
 - **Compact Exchange Protocol:** Deliver new modules/tests as clean code blocks with `Target: <relative_path>` headers rather than giant shell heredocs, and paste only compact 5–10 line summaries from `logs/*.log` into chat.
-
 - **PTY Paste & Indentation Safety (`<= 35 lines / <= 1.5 KiB`):** Never paste multi-line blocks exceeding 35 lines or 1.5 KiB into an interactive terminal; split payloads into atomic chunks <= 1.5 KiB.
 - **Log Routing & Summary Cap (`<= 15 lines`):** Route all linter, `mypy`, and `pytest` outputs into `logs/YYYYMMDD-HHMMSS_<task>.log` and never touch system `/tmp`; print at most 15 tail lines to stdout.
+- **SBOM & Path Hygiene (`CAPA-007`):** Strip PEP 610 local `file://` `externalReferences` from `CycloneDX` SBOM outputs before asserting path hygiene or publishing artifacts. Zero hardcoded `/home/<user>/` paths in tracked files or generated artifacts.
+
+---
+
+## 5. Two-Track Agentic Roadmap (Track A & Track B)
+- **Track A — Agentic SDLC (How We Build & Verify):**
+  - `v0.9.0`: Workspace instruction anchor `~/projects/GEMINI.md` (+ `AGENTS.md` symlink), `agy` v1.5.13 (`FastMCP`-native) as primary agent (`Aider` deferred; `Ollama` restricted to domain/business features), and HITL Git gate enforced via `DEVPROCESS.md` and `~/.config/antigravity/settings.json`.
+  - `v0.10.0`: Autonomous pre-release audit checks (Python string literals `<= 85` chars, path hygiene, SBOM drift, `RELEASES.md` sync) and minimal-counterexample drafting for `docs/DEFECTS_AND_CAPA.md`.
+  - `v1.0.0`: Frozen, auditable human-supervised agentic SDLC template.
+- **Track B — Product Agentic Architecture (What the Cluster Ships):**
+  - `v0.9.0` (Last Feature Release): `CR-024` (topology-aware integration runner), `CR-025` (`FastMCP` Supervisor/Worker chain across all 4 dev repos), `CR-026` (shared `CycloneDX` PEP 610 `file://` sanitizer CLI).
+  - `v0.10.0` (Harden & Observability): Cross-agent `OpenTelemetry`/`OpenInference` `trace_id`, `PyRIT` adversarial red-teaming gates, and Golden Trace replay.
+  - `v1.0.0` (Compliance Pack): Signed Release Evidence Bundle (`EU AI Act` Art. 9/12/14/15, `ISO/IEC 42001`, `ISO/IEC 24029`).
+  - `v1.X.X` (Domain Agents): Autonomous background agents inside the 4 domain apps after `v1.0.0` freeze.
+
+---
 
 ## Non-Interactive CLI Execution (No Pagers in Automation)
-- All automated shell loops, verification scripts, and `run_logged.sh` invocations **must** disable interactive terminal pagers (`less`/`more`) by setting `PAGER=cat`, `GIT_PAGER=cat and GH_PAGER=cat (`gh config set pager cat`)`, and `GH_PAGER=""` (or passing explicit `--no-pager` / `--json ... --jq ...` flags) so non-TTY and scripted runs never block or truncate stdout.
+- All automated shell loops, verification scripts, and `run_logged.sh` invocations **must** disable interactive terminal pagers (`less`/`more`) by setting `PAGER=cat`, `GIT_PAGER=cat`, and `GH_PAGER=cat` (`gh config set pager cat`) (or passing explicit `--no-pager` / `--json ... --jq ...` flags) so non-TTY and scripted runs never block or truncate stdout.
 
 ## Release Session Isolation & Bootstrap Handoff
 
