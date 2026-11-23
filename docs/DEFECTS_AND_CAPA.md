@@ -53,3 +53,11 @@ This register tracks real defects discovered during verification across the `hip
 
 ## CAPA-006: Grammar-Constrained Structured Outputs for All LLM-as-a-Judge Oracles
 - **Preventive Rule (`CR-023`):** Never rely on plain `"format": "json"` or prompt-only field hints for Pydantic-validated LLM judges. Always pass `<PydanticModel>.model_json_schema()` to Ollama's structured-output `format` parameter with `temperature=0.0` and CPU-safe timeouts (`>= 180.0s`).
+
+### BUG-004: PEP 610 `file:///home/<user>/...` URI Leakage in CI `CycloneDX` SBOM (`v0.8.0`)
+- **Symptom:** GitHub Actions `Verify & CycloneDX SBOM` failed on `test_cyclonedx_sbom_reproducibility_and_hygiene` (`assert '/home/' not in raw`) because `pip install -e ".[dev]"` writes PEP 610 `direct_url.json` (`file:///home/<user>/work/...`) into editable package metadata serialized by `cyclonedx-py environment`.
+- **Root Cause:** Editable installs in CI embed runner-specific `file://` paths into `externalReferences` of the generated `CycloneDX` BOM.
+- **Fix:** Stripped `file://` `externalReferences` during SBOM serialization in `.github/workflows/ci.yml` and `tests/test_sbom_and_contracts.py` across all 4 dev repositories.
+
+## CAPA-007: Sanitize PEP 610 Local `file://` References in Release SBOM Artifacts
+- **Preventive Rule:** Every CI SBOM pipeline and reproducibility test must strip local `file://` `externalReferences` before asserting host-path hygiene (`/home/`, `/Users/`) and publishing SBOM artifacts.
