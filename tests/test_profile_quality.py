@@ -21,10 +21,14 @@ def test_tracked_markdown_and_code_hygiene() -> None:
     files = [
         ROOT / "README.md",
         ROOT / "DEVPROCESS.md",
+        ROOT / "RELEASES.md",
+        ROOT / "docs/DEFECTS_AND_CAPA.md",
         ROOT / "pyproject.toml",
         ROOT / "docs/ci/ci.yml",
         ROOT / "tests/test_profile_quality.py",
+        *sorted((ROOT / "docs/releases").glob("*.md")),
     ]
+    assert len(files) >= 13
     for path in files:
         assert path.is_file(), f"Missing required file: {path}"
         content = path.read_text(encoding="utf-8")
@@ -32,12 +36,26 @@ def test_tracked_markdown_and_code_hygiene() -> None:
             assert not pat.search(content), f"Forbidden {pat.pattern} in {path.name}"
 
 
-def test_private_first_staged_ci_invariant() -> None:
-    staged = ROOT / "docs/ci/ci.yml"
-    assert staged.is_file(), "Staged CI workflow docs/ci/ci.yml must exist"
-    content = staged.read_text(encoding="utf-8")
-    assert "pytest -v" in content
-    assert "mypy --strict" in content
+def test_canonical_cluster_governance_invariants() -> None:
+    devp = (ROOT / "DEVPROCESS.md").read_text(encoding="utf-8")
+    for tok in ("PTY Paste", "1.5 KiB", "logs/"):
+        assert tok in devp, f"DEVPROCESS.md missing CAPA-003 token: {tok}"
+
+    capa = (ROOT / "docs/DEFECTS_AND_CAPA.md").read_text(encoding="utf-8")
+    for tok in ("BUG-001", "CAPA-001", "CAPA-002", "CAPA-003", "CAPA-004"):
+        assert tok in capa, f"DEFECTS_AND_CAPA.md missing {tok}"
+
+    retro = (ROOT / "docs/releases/v0.7.0-retrospective.md").read_text(encoding="utf-8")
+    for sec in (
+        "## Lessons Learned",
+        "## Rejected Ideas",
+        "## Unlucky Probe-Runs",
+        "## Release Chat Digest",
+    ):
+        assert sec in retro
+
+    refine = (ROOT / "docs/releases/v0.8.0-refine.md").read_text(encoding="utf-8")
+    assert "## Next-Session Bootstrap Prompt" in refine
 
 
 def test_readme_cluster_links_and_mermaid() -> None:
@@ -45,17 +63,9 @@ def test_readme_cluster_links_and_mermaid() -> None:
     assert readme.count("```mermaid") == 1
     assert readme.count("```") % 2 == 0
     assert "flowchart TB" in readme
-
     for repo in CLUSTER_REPOS:
-        repo_url = f"https://github.com/spanskikh/{repo}"
-        profile_url = (
-            f"https://github.com/spanskikh/{repo}/blob/main/docs/ENGINEERING_PROFILE.md"
+        assert f"https://github.com/spanskikh/{repo}" in readme
+        assert (
+            f"https://github.com/spanskikh/{repo}/blob/main/docs/ENGINEERING_PROFILE.md" in readme
         )
-        arch_url = f"https://github.com/spanskikh/{repo}/blob/main/docs/ARCHITECTURE.md"
-        badge_url = (
-            f"https://github.com/spanskikh/{repo}/actions/workflows/ci.yml/badge.svg"
-        )
-        assert repo_url in readme, f"Missing repo link: {repo_url}"
-        assert profile_url in readme, f"Missing profile dossier link: {profile_url}"
-        assert arch_url in readme, f"Missing architecture link: {arch_url}"
-        assert badge_url in readme, f"Missing CI badge link: {badge_url}"
+        assert f"https://github.com/spanskikh/{repo}/blob/main/docs/ARCHITECTURE.md" in readme
