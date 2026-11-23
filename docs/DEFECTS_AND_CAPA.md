@@ -45,3 +45,11 @@ This register tracks real defects discovered during verification across the `hip
 
 ## CAPA-005: Full-Tree Markdown Hygiene & Cluster SSoT Enforcement
 - **Preventive Rule (`CR-021`):** Every repository documentation gate must scan all tracked `*.md` files recursively for Cyrillic and placeholders, and dev repos must fail with `CLUSTER_DOC_DUPLICATE` if cluster-level governance docs (`DEVPROCESS.md`, `RELEASES.md`, `docs/DEFECTS_AND_CAPA.md`, `docs/releases/*`) are duplicated locally.
+
+### BUG-003: Unconstrained JSON Mode & Cold-Load ReadTimeout in Live Ollama Rubric Judge (`CR-023`)
+- **Symptom:** `_judge_doc_with_ollama` hit `httpx.ReadTimeout` at `60.0s` on cold CPU model load (`qwen2.5-coder:7b`, `5.07 GiB` on `hippo`), and under `"format": "json"` omitted `interviewer_market_value` or exceeded `rationale` `max_length=400`.
+- **Root Cause:** Ollama's generic `"format": "json"` constrains JSON syntax rather than JSON Schema fields/lengths, and `timeout=60.0` was shorter than cold GGUF load + prefill on CPU (`i5-9500`).
+- **Fix:** Switched `/api/generate` `"format"` to `DocRubricScore.model_json_schema()` (grammar-constrained decoding in `llama.cpp`) with `"options": {"temperature": 0.0}` and `timeout=180.0` across all 4 dev repos.
+
+## CAPA-006: Grammar-Constrained Structured Outputs for All LLM-as-a-Judge Oracles
+- **Preventive Rule (`CR-023`):** Never rely on plain `"format": "json"` or prompt-only field hints for Pydantic-validated LLM judges. Always pass `<PydanticModel>.model_json_schema()` to Ollama's structured-output `format` parameter with `temperature=0.0` and CPU-safe timeouts (`>= 180.0s`).

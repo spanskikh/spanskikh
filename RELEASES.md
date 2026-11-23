@@ -4,6 +4,17 @@ Official release roadmap and business-value traceability matrix across the local
 
 ---
 
+## Release `v0.8.0` (Released — 2026-11-23)
+- **Business Goal:** Enforce cross-cluster Z3 RAM allocation invariants (`hippo` 24 GiB / `rhino` 16 GiB), 12-tool FastMCP namespace disjointness, deterministic `CycloneDX` SBOM reproducibility, and live end-to-end `Ollama` + `rhino` PostgreSQL sign-off (`139/139` tests green).
+- **Retrospective:** [`docs/releases/v0.8.0-retrospective.md`](docs/releases/v0.8.0-retrospective.md) | **Refinement Record:** [`docs/releases/v0.9.0-refine.md`](docs/releases/v0.9.0-refine.md)
+
+| CR # & Short Name | Repository | Short Task Description | Contribution to Release Business Goal | Architecture Learning Value | Formal Invariant / DoD |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **CR-022: Cross-Cluster Z3 Resource Contract & `CycloneDX` SBOM Gate** | All 4 dev repos | Add `tests/test_sbom_and_contracts.py` proving joint `hippo`/`rhino` Z3 RAM budget (`SAT`/`UNSAT`), 12-tool FastMCP namespace disjointness, and two-run `CycloneDX` SBOM determinism + path hygiene in CI. | Prevents cross-service memory contention, MCP tool name collisions, and non-reproducible or path-leaking SBOM artifacts. | Cluster-level SMT composition over multi-node resource contracts and deterministic supply-chain provenance. | `test_sbom_and_contracts.py` and `.github/workflows/ci.yml` SBOM gate green across all 4 repos. |
+| **CR-023: Live Integration & Grammar-Constrained Rubric Sign-Off (`BUG-003` / `CAPA-006`)** | All 5 repos | Upgrade `_judge_doc_with_ollama` to `DocRubricScore.model_json_schema()` grammar decoding (`temperature=0.0`, `timeout=180.0`) and execute full `@pytest.mark.integration` sign-off against `hippo` Ollama and `rhino` PostgreSQL. | Eliminates stochastic schema drift in LLM-as-a-Judge evaluation and verifies live two-node execution end-to-end. | Grammar-constrained decoding (`llama.cpp` JSON Schema) enforcing Pydantic invariants at token sampling time. | `131` offline + `8` live integration tests (`139/139`) green; `v0.8.0` tagged across all 5 repos. |
+
+---
+
 ## Release `v0.7.0` (Released — 2026-11-23)
 - **Business Goal:** Standardize engineering competence, stack, process, and QA metrics documentation (`docs/ENGINEERING_PROFILE.md`) across all four cluster repositories and establish a unified root GitHub profile showcase (`spanskikh/spanskikh`) with live CI badges and architecture topology.
 - **Refinement Record:** [`docs/releases/v0.7.0-refine.md`](docs/releases/v0.7.0-refine.md)
